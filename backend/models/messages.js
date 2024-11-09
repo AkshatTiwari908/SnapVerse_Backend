@@ -3,11 +3,11 @@ const { boolean } = require('webidl-conversions')
 require('dotenv').config();
 const uri = process.env.MONGO_URI;
 mongoose.connect(
-'uri',{ useNewUrlParser: true,
+uri,{ useNewUrlParser: true,
    useUnifiedTopology: true
     
 }).then(() => console.log("Connected to MongoDB"))
-  .catch(err => console.error("Failed to connect to MongoDB", err));
+  .catch(err => console.error("Failed to connect to Messages MongoDB", err));
 
 const messageSchema = new mongoose.Schema({
     sender:{type:String,required :true,},
