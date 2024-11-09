@@ -1,12 +1,13 @@
 const express = require('express')
 const {Server} = require('socket.io')
-const User = require('./backend/models/users')
-const Message = require('./backend/models/messages')
+const User = require('./models/users')
+const Message = require('./models/messages')
 const http = require('http')
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+app.use(express.json)
 
 io.on('connection',(socket)=>{
    
@@ -88,3 +89,6 @@ io.on('connection',(socket)=>{
         
 })
 
+server.listen(3000,()=>{
+    console.log('Listening>>>>>>port 3000')
+})
