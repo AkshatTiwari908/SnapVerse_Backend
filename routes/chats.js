@@ -1,11 +1,11 @@
 //  /api/messages
 const express = require('express')
 const router = express.Router()
-const User = require('./models/users')
-const Message = require('./models/messages')
+const User = require('../models/users')
+const Message = require('../models/messages')
 
 // Chat history retreival
-router.get('/:senderId/:receiver:Id', async(req,res)=>{
+router.get('/:senderId/:receiverId', async(req,res)=>{
    const {senderId,receiverId} = req.params
    try {
     const messages = await Message.find(
@@ -53,3 +53,4 @@ router.put('/markAsRead',async(req,res)=>{
   }
 })
 
+module.exports = router
