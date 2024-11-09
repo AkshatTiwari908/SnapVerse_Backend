@@ -1,8 +1,10 @@
 const mongoose = require('mongoose')
 const { boolean } = require('webidl-conversions')
-
+require('dotenv').config();
+const uri = process.env.MONGO_URI;
 mongoose.connect(
-'mongodb+srv://akshat:12345@cluster0.k24oa.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',{
+'uri',{ useNewUrlParser: true,
+   useUnifiedTopology: true
     
 }).then(() => console.log("Connected to MongoDB"))
   .catch(err => console.error("Failed to connect to MongoDB", err));
