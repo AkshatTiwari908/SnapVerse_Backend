@@ -1,5 +1,6 @@
 //  /api/messages
 const express = require('express')
+const mongoose = require("mongoose")
 const router = express.Router()
 const User = require('../models/users')
 const Message = require('../models/messages')
@@ -22,7 +23,7 @@ router.get('/:senderId/:receiverId', async(req,res)=>{
       console.error(error)
    }
 })
-
+  
 router.post('/send',async(req,res)=>{
      const {senderId,receiverId,messageContent}=req.body
      try {
