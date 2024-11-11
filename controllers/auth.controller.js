@@ -11,12 +11,12 @@ const {
 
 const signup = async function (req, res) {
     try {
-        const { email, password, name } = req.body;
+        const { email, password, name , userName} = req.body;
         if (!email || !password || !name) {
             throw new Error("All fields are required");
         }
 
-        const userAlreadyExists = await User.findOne({ email });
+        const userAlreadyExists = await User.findOne({ userName });
         console.log("userAlreadyExists", userAlreadyExists);
 
         if (userAlreadyExists) {
@@ -29,6 +29,7 @@ const signup = async function (req, res) {
         const user = new User({
             email,
             password: hashedPassword,
+            userName,
             name,
             verificationToken,
             verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
