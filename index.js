@@ -33,10 +33,9 @@ app.use('/api/auth', authRoutes);
 // Socket.IO Setup
 oneToOnesocket(io);  
 
-
 // Start the server
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   connectDb();  
   console.log(`Server is running on port ${PORT}`);
 });
