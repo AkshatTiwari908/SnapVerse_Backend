@@ -17,11 +17,7 @@ module.exports.getPosts = async (req, res) => {
 // Create a new post
 module.exports.createPost = async (req, res) => {
     try {
-        const { caption } = req.body;
-        // if (!req.user || !req.user._id) {
-        //     return res.status(400).json({ message: 'User is not authenticated' });
-        // }
-        const userId= req.user._id;
+        const { caption,user } = req.body;
         const image = req.file
             ? {
                   url: req.file.path,
@@ -30,7 +26,7 @@ module.exports.createPost = async (req, res) => {
             : null;
 
         const post = new Post({
-            user: userId,
+            user,
             image,
             caption,
             timestamp: new Date(),
