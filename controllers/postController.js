@@ -7,7 +7,8 @@ module.exports.getPosts = async (req, res) => {
             .populate('user', 'name')
             .populate('comments.user', 'name')
             .sort({ timestamp: -1 });
-        res.render('posts', { posts });
+            res.status(200).json({ posts });
+
     } catch (err) {
         console.error(err);
         res.status(500).send('Error fetching posts');
@@ -44,21 +45,27 @@ module.exports.createPost = async (req, res) => {
 module.exports.toggleLike = async (req, res) => {
     try {
         const { postId } = req.params;
-        const userId = req.user._id;
+        const { user } = req.body;  // Now using user from req.body
 
         const post = await Post.findById(postId);
         if (!post) {
             return res.status(404).json({ error: 'Post not found' });
         }
 
-        const hasLiked = post.likes.includes(userId);
+        // Check if the user has already liked the post
+        const hasLiked = post.likes.includes(user);
         if (hasLiked) {
-            post.likes = post.likes.filter(id => id.toString() !== userId.toString());
+            // Remove the user's like
+            post.likes = post.likes.filter(id => id.toString() !== user.toString());
         } else {
-            post.likes.push(userId);
+            // Add the user's like
+            post.likes.push(user);
         }
 
+        // Save the updated post
         await post.save();
+
+        // Send the response with the updated post and likes count
         res.status(200).json({
             message: hasLiked ? 'Post unliked' : 'Post liked',
             likesCount: post.likes.length,
