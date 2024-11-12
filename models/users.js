@@ -11,6 +11,11 @@ const userSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 		},
+		userName:{ 
+             type:String,
+			 required:true,
+			 unique:true
+		},
 		name: {
 			type: String,
 			required: true,
@@ -39,6 +44,10 @@ const userSchema = new mongoose.Schema(
 );
 const User =  mongoose.model("User", userSchema);
 module.exports = User 
+
+
+
+
 
 
 

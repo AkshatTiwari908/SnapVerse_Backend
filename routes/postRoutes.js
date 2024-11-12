@@ -16,5 +16,6 @@ router.post('/',  upload.single('image'), postController.createPost);
 
 // Toggle like on a post
 router.post('/:postId/like', postController.toggleLike);
+router.delete('/:postId', postController.deletePost);
 
 module.exports = router;
