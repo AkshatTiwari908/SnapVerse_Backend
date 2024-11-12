@@ -1,12 +1,16 @@
-const Post = require('../models/post');
+const Post = require('../models/post.js'); // Import your Post model
+const User = require('../models/users.js'); // Import your User model
 
-// Add a new comment to a post
-// Add a new comment to a post
 module.exports.addComment = async (req, res) => {
     try {
         const { postId } = req.params;
-        const { text } = req.body;
-        const { user } = req.body;  // Make sure user is passed in the body
+        const { text, username } = req.body;  // Now using username instead of user ID
+
+        // Find the user by username
+        const user = await User.findOne({ userName: username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
 
         const post = await Post.findById(postId);
         if (!post) {
@@ -14,10 +18,11 @@ module.exports.addComment = async (req, res) => {
         }
 
         const newComment = {
-            user,           // user will be the ID from req.body
+            user: user._id,  // Use the user ID from the found user
             text,
             timestamp: new Date(),
         };
+
         post.comments.push(newComment);
         await post.save();
 
@@ -28,13 +33,17 @@ module.exports.addComment = async (req, res) => {
     }
 };
 
-
-// Delete a comment from a post
 // Delete a comment from a post
 module.exports.deleteComment = async (req, res) => {
     try {
         const { postId, commentId } = req.params;
-        const { user } = req.body;  // user passed in the body
+        const { username } = req.body;  // Now using username instead of user ID
+
+        // Find the user by username
+        const user = await User.findOne({ userName: username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
 
         const post = await Post.findById(postId);
         if (!post) {
@@ -46,7 +55,8 @@ module.exports.deleteComment = async (req, res) => {
             return res.status(404).json({ error: 'Comment not found' });
         }
 
-        if (comment.user.toString() !== user.toString()) {
+        // Check if the logged-in user is the author of the comment
+        if (comment.user.toString() !== user._id.toString()) {
             return res.status(403).json({ error: 'You are not authorized to delete this comment' });
         }
 
