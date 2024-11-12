@@ -71,12 +71,15 @@ module.exports.openInbox = async (req, res) => {
   }
   
   module.exports.sendMessage = async(req,res)=>{
-    const {senderId,receiverId,messageContent}=req.body
+    const {senderUsername,receiverUsername,messageContent}=req.body
+     
     try {
+       const sender = await User.findOne({ userName: senderUsername })
+       const receiver = await User.findOne({ userName: receiverUsername })
        const message = await Message.create(
        {
-           sender: senderId,
-           receiver: receiverId,
+           sender: sender._id,
+           receiver: receiver._id,
            messageContent
        })
        res.status(201).json({message:'Message sent',message})
