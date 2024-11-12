@@ -4,7 +4,6 @@
 const express = require('express');
 const router = express.Router();
 const postController = require('../controllers/postController');
-// const upload = require('../cloudConfig').upload; 
 const multer  = require('multer');
  const storage = require("../cloudConfig.js");
  const upload = multer({ storage});

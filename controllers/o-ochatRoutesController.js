@@ -3,21 +3,20 @@ const Message = require('../models/messages')
 const mongoose = require('mongoose')
 
 module.exports.openInbox = async (req, res) => {
-    let { userId } = req.body;
+    let { username } = req.params;
         // There is problem in this API how the frontend will dereference objecId of sender and reciever
-        
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: 'Invalid userId format' });
+      const user = User.findOne({ userName: username })
+    if (!user) {
+      return res.status(400).json({ message: 'username Is incorrect' });
     }
-    userId = new  mongoose.Types.ObjectId(userId.trim());
    
     try {
       const inbox = await Message.aggregate([
         {
           $match: {
             $or: [
-              { sender: userId },
-              { receiver: userId }
+              { sender: user._id },
+              { receiver: user._id }
             ]
           }
         },
@@ -28,7 +27,7 @@ module.exports.openInbox = async (req, res) => {
           $group: {
             _id: {
               conversationWith: { 
-                $cond: { if: { $eq: ["$sender", userId] }, then: "$receiver", else: "$sender" }
+                $cond: { if: { $eq: ["$sender", user._id] }, then: "$receiver", else: "$sender" }
               }
             },
             latestMessage: { $first: "$$ROOT" } // Get the latest message in each conversation
@@ -51,15 +50,15 @@ module.exports.openInbox = async (req, res) => {
   }
    
  module.exports.chatHistory = async (req, res) => {
-    let { senderId, receiverId } = req.params;
-    senderId = new  mongoose.Types.ObjectId(senderId.trim());
-    receiverId = new mongoose.Types.ObjectId(receiverId.trim());
+    let { senderUsername, receiverUsername} = req.params;
+    sender = await User.findOne({ userName: senderUsername })
+    receiver = await User.findOne({ userName: receiverUsername })
   
     try {
       const messages = await Message.find({
         $or: [
-          { sender: senderId, receiver: receiverId },
-          { sender: receiverId, receiver: senderId }
+          { sender: sender._id, receiver: receiver._id },
+          { sender: receiver._id, receiver: sender._id }
         ]
       }).sort({ timeStamp: 1 });  // oldest first
       res.status(200).json(messages);
@@ -71,12 +70,15 @@ module.exports.openInbox = async (req, res) => {
   }
   
   module.exports.sendMessage = async(req,res)=>{
-    const {senderId,receiverId,messageContent}=req.body
+    const {senderUsername,receiverUsername,messageContent}=req.body
+     
     try {
+       const sender = await User.findOne({ userName: senderUsername })
+       const receiver = await User.findOne({ userName: receiverUsername })
        const message = await Message.create(
        {
-           sender: senderId,
-           receiver: receiverId,
+           sender: sender._id,
+           receiver: receiver._id,
            messageContent
        })
        res.status(201).json({message:'Message sent',message})
@@ -85,11 +87,13 @@ module.exports.openInbox = async (req, res) => {
     }
 }
 module.exports.markAsRead = async(req,res)=>{
-    const {userId,senderId} = req.body
+    const {userUsername,senderUsername} = req.body
+       const user = await User.findOne({ userName:userUsername  })
+       const sender = await User.findOne({ userName: senderUsername })
     try {
       
           await Message.updateMany(
-              { sender: senderId, receiver: userId, readStatus: false },
+              { sender: sender._id, receiver: user._id, readStatus: false },
               { readStatus: true }
           )
           res.status(200).json({ message: 'Messages marked as read' })
