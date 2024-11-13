@@ -1,5 +1,5 @@
 const express =  require("express");
-
+const User = require('../models/users')
 const {
 	login,
 	logout,
@@ -20,4 +20,5 @@ router.post("/verify-email", verifyEmail);
  router.post("/forgot-password", forgotPassword);
  router.post("/reset-password/:token", resetPassword);
 router.get("/check-auth", checkAuth);
+
 module.exports= router;
