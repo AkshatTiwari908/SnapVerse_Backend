@@ -6,6 +6,7 @@ const http = require('http');
 const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const Messenger = require('./routes/chats');
+const searcher = require('./routes/searchRoutes.js')
 const oneToOnesocket = require('./sockets/o-oSocket');
 const dotenv = require('dotenv');
 const connectDb = require('./db/connectDb.js');
@@ -22,20 +23,21 @@ app.set("view engine","ejs");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-app.use('/public', express.static('public'));  
+app.use(express.static(path.join(__dirname,'clientTesting')));  
 
 // Routes
 app.use('/posts', postRoutes);  
 app.use('/posts', commentRoutes);  
 app.use('/api/messages', Messenger);  
-app.use('/api/auth', authRoutes);  
+app.use('/api/auth', authRoutes); 
+app.use('/api/search',searcher); 
 
 // Socket.IO Setup
-oneToOnesocket(io);  
+oneToOnesocket(io);
 
 // Start the server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   connectDb();  
   console.log(`Server is running on port ${PORT}`);
 });
