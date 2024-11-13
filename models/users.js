@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema(
 		name: {
 			type: String,
 			required: true,
+			unique: true,
 		},
 		lastLogin: {
 			type: Date,
@@ -35,6 +36,7 @@ const userSchema = new mongoose.Schema(
 		socketId: { 
 			type: String
 		},
+	
 		resetPasswordToken: String,
 		resetPasswordExpiresAt: Date,
 		verificationToken: String,

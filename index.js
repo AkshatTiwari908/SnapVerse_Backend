@@ -11,6 +11,7 @@ const oneToOnesocket = require('./sockets/o-oSocket');
 const dotenv = require('dotenv');
 const connectDb = require('./db/connectDb.js');
 const authRoutes = require('./routes/auth.route.js');
+const follow = require('./routes/follow');
 const cors = require('cors');
 
 dotenv.config();
@@ -31,6 +32,7 @@ app.use('/posts', commentRoutes);
 app.use('/api/messages', Messenger);  
 app.use('/api/auth', authRoutes); 
 app.use('/api/search',searcher); 
+app.use('/follow',follow)
 
 // Socket.IO Setup
 oneToOnesocket(io);
