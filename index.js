@@ -32,7 +32,7 @@ app.use('/posts', commentRoutes);
 app.use('/api/messages', Messenger);  
 app.use('/api/auth', authRoutes); 
 app.use('/api/search',searcher); 
-app.use('/follow',follow)
+//app.use('/follow',follow)
 
 // Socket.IO Setup
 oneToOnesocket(io);
