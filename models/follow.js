@@ -1,8 +1,25 @@
-const mongoose = require('mongoose')
-const {ObjectId} = mongoose.Schema.Types 
+const mongoose = require('mongoose');
+
 const followSchema = new mongoose.Schema({
-    followers:[{type:ObjectId,ref:"User"}],
-    following:[{type:ObjectId,ref:"User"}]
-})
-const follow = mongoose.model('Follow', followSchema);
-module.exports= follow ;
+  requesterId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  receiverId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  status: {
+    type: String,
+    enum: ['requested', 'accepted', 'rejected'],
+    default: 'requested'
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+module.exports = mongoose.model('Follow', followSchema);
