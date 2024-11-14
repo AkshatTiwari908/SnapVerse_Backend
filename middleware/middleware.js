@@ -3,7 +3,8 @@ const jwt = require('jsonwebtoken');
 const authenticateToken = (req, res, next) => {
    
     const token = req.cookies.token;
-
+    
+    console.log(token);
 
     if (!token) {
         return res.status(403).json({ message: "Token is required" });
@@ -17,6 +18,7 @@ const authenticateToken = (req, res, next) => {
 
 
         req.userId = decoded.userId;
+        console.log(req.userId);
 
         next();
     });
