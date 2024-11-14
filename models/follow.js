@@ -13,13 +13,14 @@ const followSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['requested', 'accepted', 'rejected'],
+    enum: ['requested'],
     default: 'requested'
   },
   createdAt: {
     type: Date,
     default: Date.now
   }
+  
 });
 
 module.exports = mongoose.model('Follow', followSchema);

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const { Server } = require('socket.io');
 const http = require('http');
+const cookieParser = require('cookie-parser'); 
 const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const Messenger = require('./routes/chats');
@@ -25,6 +26,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(express.static(path.join(__dirname,'clientTesting')));  
+app.use('/public', express.static('public'));
+app.use(cookieParser());  
 
 // Routes
 app.use('/posts', postRoutes);  
@@ -32,7 +35,7 @@ app.use('/posts', commentRoutes);
 app.use('/api/messages', Messenger);  
 app.use('/api/auth', authRoutes); 
 app.use('/api/search',searcher); 
-//app.use('/follow',follow)
+app.use('/',follow)
 
 // Socket.IO Setup
 oneToOnesocket(io);
