@@ -4,7 +4,7 @@ module.exports.searchGlobal =async(req,res)=>{
     try{
     const query = req.query.q
     if(!query){
-        res.status(400).json({error :"Type Something to search"})
+       return res.status(400).json({error :"Type Something to search"})
     }
     const people = await User.aggregate([
         {

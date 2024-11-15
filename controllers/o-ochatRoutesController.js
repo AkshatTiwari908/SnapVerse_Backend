@@ -1,64 +1,65 @@
 const User = require('../models/users')
 const Message = require('../models/messages')
-const mongoose = require('mongoose')
 
-module.exports.openInbox = async (req, res) => {
-    let { username } = req.params;
-        // There is problem in this API how the frontend will dereference objecId of sender and reciever
-      const user = User.findOne({ userName: username })
+module.exports.openInbox = async (req, res) => {  //Tested Fine
+  const userId = req.userId;
+
+  try {
+    const user = await User.findOne({ _id: userId });
     if (!user) {
-      return res.status(400).json({ message: 'username Is incorrect' });
+      return res.status(400).json({ message: 'Username is incorrect' });
     }
-   
-    try {
-      const inbox = await Message.aggregate([
-        {
-          $match: {
-            $or: [
-              { sender: user._id },
-              { receiver: user._id }
-            ]
-          }
-        },
-        {
-          $sort: { timeStamp: -1 } // Sort messages by timeStamp in descending order
-        },
-        {
-          $group: {
-            _id: {
-              conversationWith: { 
-                $cond: { if: { $eq: ["$sender", user._id] }, then: "$receiver", else: "$sender" }
-              }
-            },
-            latestMessage: { $first: "$$ROOT" } // Get the latest message in each conversation
-          }
-        },
-        {
-          $replaceRoot: { newRoot: "$latestMessage" }
-        },
-        {
-          $sort: { timeStamp: -1 } // Sort conversations by latest message timestamp
+
+    const inbox = await Message.aggregate([
+      {
+        $match: {
+          $or: [
+            { sender: userId },
+            { receiver: userId }
+          ]
         }
-      ]);
-  
-      res.status(200).json(inbox);
-  
-    } catch (error) {
-      console.error("Error fetching inbox:", error);
-      res.status(500).json({ message: "Failed to fetch inbox" });
-    }
+      },
+      {
+        $sort: { timeStamp: -1 } // Sort messages by timestamp in descending order
+      },
+      {
+        $group: {
+          _id: {
+            conversationWith: { 
+              $cond: { if: { $eq: ["$sender", userId] }, then: "$receiver", else: "$sender" }
+            }
+          },
+          latestMessage: { $first: "$$ROOT" } // Get the latest message in each conversation
+        }
+      },
+      {
+        $replaceRoot: { newRoot: "$latestMessage" }
+      },
+      {
+        $sort: { timeStamp: -1 } // Sort conversations by the latest message timestamp
+      }
+    ]);
+
+    res.status(200).json(inbox);
+
+  } catch (error) {
+    console.error("Error fetching inbox:", error);
+    res.status(500).json({ message: "Failed to fetch inbox" });
   }
-   
- module.exports.chatHistory = async (req, res) => {
-    let { senderUsername, receiverUsername} = req.params;
-    sender = await User.findOne({ userName: senderUsername })
-    receiver = await User.findOne({ userName: receiverUsername })
+}
+
+ module.exports.chatHistory = async (req, res) => {   // Tested Fine
+    let { receiverUsername} = req.params;
+    let opener = req.userId
+    sender = await User.findOne({ userName: receiverUsername }) 
+    opener = await User.findById(opener)
+
   
     try {
       const messages = await Message.find({
         $or: [
-          { sender: sender._id, receiver: receiver._id },
-          { sender: receiver._id, receiver: sender._id }
+          { sender: sender._id, receiver: opener},
+          { sender: opener, receiver: sender._id }
         ]
       }).sort({ timeStamp: 1 });  // oldest first
       res.status(200).json(messages);
@@ -69,11 +70,12 @@ module.exports.openInbox = async (req, res) => {
     }
   }
   
-  module.exports.sendMessage = async(req,res)=>{
-    const {senderUsername,receiverUsername,messageContent}=req.body
+  module.exports.sendMessage = async(req,res)=>{  //Tested Fine
+    const {receiverUsername,messageContent}=req.body
+    const senderId = req.userId;
      
     try {
-       const sender = await User.findOne({ userName: senderUsername })
+       const sender = await User.findById(senderId)
        const receiver = await User.findOne({ userName: receiverUsername })
        const message = await Message.create(
        {
@@ -86,19 +88,32 @@ module.exports.openInbox = async (req, res) => {
        res.status(500).json({ message: 'Failed to send message' })
     }
 }
-module.exports.markAsRead = async(req,res)=>{
-    const {userUsername,senderUsername} = req.body
-       const user = await User.findOne({ userName:userUsername  })
-       const sender = await User.findOne({ userName: senderUsername })
-    try {
-      
-          await Message.updateMany(
-              { sender: sender._id, receiver: user._id, readStatus: false },
-              { readStatus: true }
-          )
-          res.status(200).json({ message: 'Messages marked as read' })
-      
-    } catch (error) {
-          res.status(500).json({ message: 'Failed to update messages' }) 
-    }
+module.exports.markAsRead = async (req, res) => { // Tested Fine
+  const { senderUsername } = req.body;
+  const opener = req.userId;
+
+  try {
+      const user = await User.findById(opener);
+      const sender = await User.findOne({ userName: senderUsername });
+
+      if (!sender) {
+          return res.status(404).json({ message: 'Sender not found' });
+      }
+      if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+      }
+      const result = await Message.updateMany(
+          { sender: sender._id, receiver: user._id, readStatus: false },
+          { readStatus: true }
+      );
+      if (result.matchedCount === 0) {
+          return res.status(200).json({ message: 'No unread messages to mark as read' });
+      }
+      console.log('Update Result:', result);
+      res.status(200).json({ message: 'Messages marked as read' });
+
+  } catch (error) {
+      console.error('Error updating messages:', error);
+      res.status(500).json({ message: 'Failed to update messages' });
   }
+};
