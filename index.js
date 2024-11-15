@@ -1,5 +1,4 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const path = require('path');
 const { Server } = require('socket.io');
 const http = require('http');
@@ -8,8 +7,8 @@ const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const Messenger = require('./routes/chats');
 const searcher = require('./routes/searchRoutes.js')
-//const myProfileRouter = require('./routes/myProfileRoute.js')
-//const homePage = require('./routes/homeRoute.js')
+const myProfileRouter = require('./routes/myProfileRoute.js')
+const homePage = require('./routes/homeRoute.js')
 const oneToOnesocket = require('./sockets/o-oSocket');
 const dotenv = require('dotenv');
 const connectDb = require('./db/connectDb.js');
@@ -37,8 +36,8 @@ app.use('/posts', commentRoutes);
 app.use('/api/messages', Messenger);  
 app.use('/api/auth', authRoutes); 
 app.use('/api/search',searcher); 
-//app.use('/api/user',myProfileRouter);
-//app.use('/home',homePage)
+app.use('/api/user',myProfileRouter);
+app.use('/home',homePage)
 app.use('/',follow)   // issue here wrong routing this could damage other api routes access
 
 // Socket.IO Setup
