@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema(
 		name: {
 			type: String,
 			required: true,
+			unique: true,
 		},
 		lastLogin: {
 			type: Date,
@@ -35,6 +36,14 @@ const userSchema = new mongoose.Schema(
 		socketId: { 
 			type: String
 		},
+		followersCount: {
+			type: Number,
+			default: 0
+		  },
+		  followingCount: {
+			type: Number,
+			default: 0
+		  },
 		resetPasswordToken: String,
 		resetPasswordExpiresAt: Date,
 		verificationToken: String,
