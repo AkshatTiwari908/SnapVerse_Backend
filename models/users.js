@@ -19,7 +19,6 @@ const userSchema = new mongoose.Schema(
 		name: {
 			type: String,
 			required: true,
-			unique: true,
 		},
 		lastLogin: {
 			type: Date,
@@ -53,6 +52,10 @@ const userSchema = new mongoose.Schema(
 );
 const User =  mongoose.model("User", userSchema);
 module.exports = User 
+
+
+
+
 
 
 

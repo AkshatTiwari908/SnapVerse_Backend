@@ -7,6 +7,9 @@ const cookieParser = require('cookie-parser');
 const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const Messenger = require('./routes/chats');
+const searcher = require('./routes/searchRoutes.js')
+//const myProfileRouter = require('./routes/myProfileRoute.js')
+//const homePage = require('./routes/homeRoute.js')
 const oneToOnesocket = require('./sockets/o-oSocket');
 const dotenv = require('dotenv');
 const connectDb = require('./db/connectDb.js');
@@ -24,6 +27,7 @@ app.set("view engine","ejs");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+app.use(express.static(path.join(__dirname,'clientTesting')));  
 app.use('/public', express.static('public'));
 app.use(cookieParser());  
 
@@ -31,16 +35,18 @@ app.use(cookieParser());
 app.use('/posts', postRoutes);  
 app.use('/posts', commentRoutes);  
 app.use('/api/messages', Messenger);  
-app.use('/api/auth', authRoutes);  
-app.use('/',follow)
-
+app.use('/api/auth', authRoutes); 
+app.use('/api/search',searcher); 
+//app.use('/api/user',myProfileRouter);
+//app.use('/home',homePage)
+app.use('/',follow)   // issue here wrong routing this could damage other api routes access
 
 // Socket.IO Setup
-oneToOnesocket(io);  
+oneToOnesocket(io);
 
 // Start the server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   connectDb();  
   console.log(`Server is running on port ${PORT}`);
 });
