@@ -1,5 +1,6 @@
 const Post = require('../models/post');
-const User = require('../models/users'); // Import your User model
+const User = require('../models/users');
+
 // Fetch all posts
 module.exports.getPosts = async (req, res) => {
     try {
@@ -7,8 +8,7 @@ module.exports.getPosts = async (req, res) => {
             .populate('user', 'name')
             .populate('comments.user', 'name')
             .sort({ timestamp: -1 });
-            res.status(200).json({ posts });
-
+        res.status(200).json({ posts });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error fetching posts');
@@ -16,14 +16,13 @@ module.exports.getPosts = async (req, res) => {
 };
 
 // Create a new post
-
-
 module.exports.createPost = async (req, res) => {
     try {
-        const { caption, username } = req.body;
+        const { caption } = req.body;
+        const userId = req.userId; // Retrieved from the authenticateToken middleware
 
-        // Find the user by username
-        const user = await User.findOne({ userName: username });
+        // Check if the user exists
+        const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -36,7 +35,7 @@ module.exports.createPost = async (req, res) => {
             : null;
 
         const post = new Post({
-            user: user._id, // Use user ID from found user
+            user: user._id,
             image,
             caption,
             timestamp: new Date(),
@@ -50,18 +49,11 @@ module.exports.createPost = async (req, res) => {
     }
 };
 
-
 // Toggle like on a post
 module.exports.toggleLike = async (req, res) => {
     try {
         const { postId } = req.params;
-        const { username } = req.body;  // Now using username from req.body
-
-        // Find the user by username
-        const user = await User.findOne({ userName: username });
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
+        const userId = req.userId; // Retrieved from the authenticateToken middleware
 
         const post = await Post.findById(postId);
         if (!post) {
@@ -69,7 +61,6 @@ module.exports.toggleLike = async (req, res) => {
         }
 
         // Check if the user has already liked the post
-        const userId = user._id.toString();
         const hasLiked = post.likes.includes(userId);
 
         if (hasLiked) {
@@ -80,10 +71,8 @@ module.exports.toggleLike = async (req, res) => {
             post.likes.push(userId);
         }
 
-        // Save the updated post
         await post.save();
 
-        // Send the response with the updated post and likes count
         res.status(200).json({
             message: hasLiked ? 'Post unliked' : 'Post liked',
             likesCount: post.likes.length,
@@ -94,17 +83,23 @@ module.exports.toggleLike = async (req, res) => {
         res.status(500).json({ error: 'Error toggling like on post' });
     }
 };
+
+// Delete a post
 module.exports.deletePost = async (req, res) => {
     try {
         const { postId } = req.params;
+        const userId = req.userId; // Retrieved from the authenticateToken middleware
 
-        // Find the post by ID
         const post = await Post.findById(postId);
         if (!post) {
             return res.status(404).json({ error: 'Post not found' });
         }
 
-        // Delete the post
+        // Check if the post belongs to the user
+        if (post.user.toString() !== userId) {
+            return res.status(403).json({ error: 'Unauthorized to delete this post' });
+        }
+
         await Post.findByIdAndDelete(postId);
 
         res.status(200).json({ message: 'Post deleted successfully' });
