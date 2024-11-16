@@ -1,25 +1,20 @@
 const express = require('express')
 const router = express.Router()
-
-const Follow = require('../models/follow.js')
-const mongoose = require('mongoose')
 const verifyToken = require('../middleware/middleware.js'); 
-
 const homePageControllers = require('../controllers/homePageController.js')
+const followingsFollowersControllers = require('../controllers/arrayFollowErsIngsControllers.js')
 
 router.get('/',verifyToken , async (req, res) => {
     try {
         const userId = req.userId; //User Id coming from JWT and token bearer
        const postsResponse = await homePageControllers.fetchPosts(); // This calls the existing posts API
-
         // Fetch online users
         const onlineUsersResponse = await homePageControllers.fetchOnlineUsers(); // This will calls the existing online users API
-
         // Fetch current user's profile data
         const userProfileResponse = await homePageControllers.fetchUserProfile(userId); // This calls the existing user profile API
         const responseData = {
             posts: postsResponse, 
-            onlineUsers: onlineUsersResponse, // Array of online users
+            onlineUsers: onlineUsersResponse, // Array of online users 
             userProfile: userProfileResponse, // Current user's profile data
         };
 
@@ -33,51 +28,8 @@ router.get('/',verifyToken , async (req, res) => {
 router.get('/online-users',async(req,res)=>{
     try {
         const userId = req.userId; 
-        const followings = await Follow.aggregate([
-          {
-            $match: { requesterId:new mongoose.Types.ObjectId(userId), status: 'requested' }
-          },
-          {
-            $lookup: {
-              from: 'users',  
-              localField: 'receiverId',
-              foreignField: '_id',
-              as: 'receiverInfo'
-            }
-          },
-          { $unwind: '$receiverInfo' },
-          {
-            $project: {
-              _id: 0,
-              receiverId: '$receiverId',
-              userName: '$receiverInfo.userName',
-              isOnline: '$receiverInfo.isOnline'
-            }
-          }
-        ]);
-
-        const followers = await Follow.aggregate([
-          {
-            $match: { receiverId:new mongoose.Types.ObjectId(userId), status: 'requested' }
-          },
-          {
-            $lookup: {
-              from: 'users',  
-              localField: 'requesterId',
-              foreignField: '_id',
-              as: 'requesterInfo'
-            }
-          },
-          { $unwind: '$requesterInfo' },
-          {
-            $project: {
-              _id: 0,
-              requesterId: '$requesterId',
-              userName: '$requesterInfo.userName',
-              isOnline: '$requesterInfo.isOnline'
-            }
-          }
-        ]);
+        const followings = await followingsFollowersControllers.followingArray(userId)
+        const followers = await followingsFollowersControllers.followersArray(userId)
     
         // Filtering
         const onlineFollowings = followings.filter(following => following.isOnline === true);

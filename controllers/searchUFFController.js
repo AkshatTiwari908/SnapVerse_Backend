@@ -1,6 +1,7 @@
 const User = require('../models/users')
+const Follow = require('../models/follow')
 
-module.exports.searchGlobal =async(req,res)=>{
+module.exports.searchGlobal = async(req,res)=>{
     try{
     const query = req.query.q
     if(!query){
@@ -21,4 +22,16 @@ module.exports.searchGlobal =async(req,res)=>{
 }catch(error){
     res.status(500).json({ error: 'An error occurred while searching' });
 }
+}
+
+module.exports.searchMyFollowers = async(req,res)=>{
+    try {
+        const userId = req.userId  // whooseFollowers
+        const query = req.query.q
+        
+    } catch (error) {
+        
+    }
+       
+
 }
