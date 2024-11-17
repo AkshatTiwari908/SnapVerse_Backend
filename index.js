@@ -6,6 +6,7 @@ const http = require('http');
 const cookieParser = require('cookie-parser'); 
 const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes');
+const profileimage = require('./routes/profileimage.js')
 const Messenger = require('./routes/chats');
 const searcher = require('./routes/searchRoutes.js')
 const oneToOnesocket = require('./sockets/o-oSocket');
@@ -36,7 +37,7 @@ app.use('/api/messages', Messenger);
 app.use('/api/auth', authRoutes); 
 app.use('/api/search',searcher); 
 app.use('/',follow)
-
+app.use('/',profileimage)
 // Socket.IO Setup
 oneToOnesocket(io);
 

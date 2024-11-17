@@ -1,6 +1,6 @@
 const Post = require('../models/post');
 const User = require('../models/users');
-
+const Follow = require('../models/follow.js');
 // Fetch all posts
 module.exports.getPosts = async (req, res) => {
     try {
@@ -39,8 +39,7 @@ module.exports.createPost = async (req, res) => {
             image,
             caption,
             timestamp: new Date(),
-        });
-
+        }); 
         await post.save();
         res.status(201).json(post);
     } catch (error) {
@@ -107,4 +106,31 @@ module.exports.deletePost = async (req, res) => {
         console.error(error);
         res.status(500).json({ error: 'Error deleting post' });
     }
+};
+
+
+exports.getFollowingPosts = async (req, res) => {
+  try {
+    const userId = req.userId; // Get userId from JWT middleware
+
+    // Find all users the current user is following
+    const following = await Follow.find({
+      requesterId: userId,
+      status: 'accepted' // Assuming 'status' indicates accepted follow requests
+    }).select('receiverId'); // Select only the receiverId field
+
+    // Extract the IDs of the users being followed
+    const followingIds = following.map(follow => follow.receiverId);
+
+    // Fetch posts only from the users being followed
+    const posts = await Post.find({ user: { $in: followingIds } }) // Filter posts
+      .populate('user', 'name') // Populate user details (e.g., name)
+      .populate('comments.user', 'name') // Populate commenter details
+      .sort({ timestamp: -1 }); // Sort by timestamp, latest first
+
+    res.status(200).json({ posts });
+  } catch (err) {
+    console.error("Error fetching following posts:", err);
+    res.status(500).send('Error fetching posts');
+  }
 };
