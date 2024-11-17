@@ -111,13 +111,13 @@ module.exports.deletePost = async (req, res) => {
 
 exports.getFollowingPosts = async (req, res) => {
   try {
-    const userId = req.userId; // Get userId from JWT middleware
-
+    const userId = req.params.id; // Get userId from JWT middleware
+    console.log(`Trying to fetch ${userId}`)
     // Find all users the current user is following
     const following = await Follow.find({
       requesterId: userId,
-      status: 'accepted' // Assuming 'status' indicates accepted follow requests
-    }).select('receiverId'); // Select only the receiverId field
+      status: 'accepted' 
+    }).select('receiverId'); 
 
     // Extract the IDs of the users being followed
     const followingIds = following.map(follow => follow.receiverId);

@@ -1,42 +1,32 @@
-/* const LRU= require('lru-cache');
-const cache = new LRU({
-    max: 100,                  // Maximum number of items to cache
-    ttl: 1000 * 60 * 10        // Time-to-live in milliseconds (10 minutes)
-});
- */
-
-module.exports.fetchPosts = async () => {
-  /*   const cacheKey = 'posts'; // Unique cache key for posts
-    if (cache.has(cacheKey)) {
-        console.log('cache memory triggered')
-        return cache.get(cacheKey); // Return cached posts if available
-    } */
-
+module.exports.fetchFollowingPosts = async (userId) => {
     try {
-        const response = await fetch('https://snapverse-6nqx.onrender.com/posts');
-        if (!response.ok) throw new Error('Failed to fetch posts');
-        const data = await response.json(); // Fetch and parse posts data
-/* 
-        cache.set(cacheKey, data); */ // Cache the posts data
+       
+        // Fetch posts from /posts/following
+        const response = await fetch(`https://snapverse-6nqx.onrender.com/posts/following/${userId}`);
+
+        // If the response is not OK (non-200 status), handle the error
+        if (!response.ok) {
+            console.error('Failed to fetch posts:', response.status, response.statusText);
+            throw new Error(`Failed to fetch posts of ${userId}`);
+        }
+
+        const data = await response.json()
         return data;
+
     } catch (error) {
-        console.error("Error fetching posts:", error);
-        throw error; // Re-throw to handle at a higher level if needed
+        console.error('Error fetching posts:', error);
+        throw error;
     }
 };
 
-module.exports.fetchUserProfile = async (userId) => {
- /*    const cacheKey = `userProfile-${userId}`;
-    if (cache.has(cacheKey)) {
-        return cache.get(cacheKey); 
-    } */
 
+
+module.exports.fetchUserProfile = async (userId) => {
     try {
         const response = await fetch(`https://snapverse-6nqx.onrender.com/api/user/profile/${userId}`);
         if (!response.ok) throw new Error('Failed to fetch user profile');
         const data = await response.json(); 
-/* 
-        cache.set(cacheKey, data); */
+
         return data;
     } catch (error) {
         console.error(`Error fetching profile for user :${userId}`, error);

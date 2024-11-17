@@ -7,13 +7,11 @@ const followingsFollowersControllers = require('../controllers/arrayFollowErsIng
 router.get('/',verifyToken , async (req, res) => {
     try {
         const userId = req.userId; //User Id coming from JWT and token bearer
-       const postsResponse = await homePageControllers.fetchPosts(); // This calls the existing posts API
-        // Fetch online users
+       const postsResponse = await homePageControllers.fetchFollowingPosts(userId); // This calls the existing posts API
         const onlineUsersResponse = await homePageControllers.fetchOnlineUsers(); // This will calls the existing online users API
-        // Fetch current user's profile data
         const userProfileResponse = await homePageControllers.fetchUserProfile(userId); // This calls the existing user profile API
         const responseData = {
-            posts: postsResponse, 
+            posts: postsResponse.posts, 
             onlineUsers: onlineUsersResponse, // Array of online users 
             userProfile: userProfileResponse, // Current user's profile data
         };
