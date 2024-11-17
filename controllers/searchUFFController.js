@@ -1,6 +1,8 @@
 const User = require('../models/users')
+const Follow = require('../models/follow')
+const listofFollowersFollowings = require('../controllers/arrayFollowErsIngsControllers')
 
-module.exports.searchGlobal =async(req,res)=>{
+module.exports.searchGlobal = async(req,res)=>{
     try{
     const query = req.query.q
     if(!query){
@@ -21,4 +23,25 @@ module.exports.searchGlobal =async(req,res)=>{
 }catch(error){
     res.status(500).json({ error: 'An error occurred while searching' });
 }
+}
+
+module.exports.searchMyFollowers = async(req,res)=>{
+    try {
+        const userId = req.userId  // whooseFollowers
+        const query = req.query.q  // Searched User
+        const followers = await listofFollowersFollowings.followersArray()
+       
+        let filteredFollowers = followers
+        if(query){
+            const regex = new RegExp(query, 'i');
+            filteredFollowers = followers.filter(follower =>
+                regex.test(follower.userName) 
+              );
+        }
+
+    } catch (error) {
+        
+    }
+       
+
 }
