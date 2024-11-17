@@ -5,6 +5,7 @@ const http = require('http');
 const cookieParser = require('cookie-parser'); 
 const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes');
+const profileimage = require('./routes/profileimage.js')
 const Messenger = require('./routes/chats');
 const searcher = require('./routes/searchRoutes.js')
 const myProfileRouter = require('./routes/myProfileRoute.js')
@@ -39,7 +40,7 @@ app.use('/api/search',searcher);
 app.use('/api/user',myProfileRouter);
 app.use('/home',homePage)
 app.use('/',follow)   // issue here wrong routing this could damage other api routes access
-
+app.use('/',profileimage)
 // Socket.IO Setup
 oneToOnesocket(io);
 
