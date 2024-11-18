@@ -1,7 +1,7 @@
 const User = require('../models/users')
 const Message = require('../models/messages')
 
-module.exports.join = async({userId})=>{
+module.exports.join = async({userId},socket)=>{
     try {
         const user = await User.findByIdAndUpdate(
             userId,

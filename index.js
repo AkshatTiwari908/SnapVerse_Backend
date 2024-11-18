@@ -26,7 +26,13 @@ app.set("view engine","ejs");
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+const corsOptions = {
+  origin: 'http://localhost:5173',  // Your frontend running locally on localhost:3000
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],  // Methods you want to allow
+  allowedHeaders: ['Content-Type', 'Authorization'],  // Allowed headers
+  credentials: true,  // Allow cookies to be sent with requests (if necessary)
+};
+app.use(cors(corsOptions));
 app.use(express.static(path.join(__dirname,'clientTesting')));  
 app.use('/public', express.static('public'));
 app.use(cookieParser());  
