@@ -1,5 +1,6 @@
 const User = require('../models/users.js');
 const Follow = require('../models/follow.js');
+const Notification = require('../models/notification.js');
 
 exports.sendFollowRequest = async (req, res) => {
   try {
@@ -28,6 +29,13 @@ exports.sendFollowRequest = async (req, res) => {
      await User.findByIdAndUpdate(senderId, { $inc: { followingCount: 1 } });
 
      await User.findByIdAndUpdate(receiverId, { $inc: { followersCount: 1 } });
+
+     await Notification.create({
+      user: senderId,
+      sender: receiverId,
+      type: 'follow', 
+      content: `User ${followerId} started following you.`,
+    });
 
     res.status(201).json({ message: "Follow request sent!" });
   } catch (error) {

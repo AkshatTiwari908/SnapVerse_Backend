@@ -22,7 +22,6 @@ module.exports.addComment = async (req, res) => {
             text,
             timestamp: new Date(),
         };
-
         post.comments.push(newComment);
         await post.save();
 

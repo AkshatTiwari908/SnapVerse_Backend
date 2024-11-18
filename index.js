@@ -15,6 +15,7 @@ const dotenv = require('dotenv');
 const connectDb = require('./db/connectDb.js');
 const authRoutes = require('./routes/auth.route.js');
 const follow = require('./routes/follow');
+const notificationRoutes = require('./routes/notification.js');
 const cors = require('cors');
 
 dotenv.config();
@@ -39,8 +40,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/search',searcher); 
 //app.use('/api/user',myProfileRouter);
 //app.use('/home',homePage)
-app.use('/',follow)   // issue here wrong routing this could damage other api routes access
-
+app.use('/api/follow',follow)   // issue here wrong routing this could damage other api routes access
+app.use('/notifications', notificationRoutes);
 // Socket.IO Setup
 oneToOnesocket(io);
 
