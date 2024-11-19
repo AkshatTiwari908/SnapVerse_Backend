@@ -1,17 +1,18 @@
-const oneToOneSocControllers = require('../controllers/o-oChatSocketsController')
-  module.exports = (io)=>{
-    io.on('connection',(socket)=>{
-   
-        console.log(`New User Connected ${socket.id}`)
-        
-        socket.on('join', oneToOneSocControllers.join);
-        socket.on('sendMessage', oneToOneSocControllers.sendMessage);
-        socket.on('markAsRead', oneToOneSocControllers.markAsRead);
-        socket.on('disconnect', oneToOneSocControllers.disconnect);
-            
-    })
-  } 
+const oneToOneSocControllers = require('../controllers/o-oChatSocketsController');
+const jwt = require('jsonwebtoken'); 
 
+
+module.exports = (io) => {
+  
+    io.on('connection', (socket) => {
+        console.log(`New User Connected ${socket.id}`);
+
+        socket.on('join', (data) => oneToOneSocControllers.join(data, io, socket));
+        socket.on('sendMessage', (data) => oneToOneSocControllers.sendMessage(data, io));
+        socket.on('markAsRead', (data) => oneToOneSocControllers.markAsRead(data));
+        socket.on('disconnect', () => oneToOneSocControllers.disconnect(socket));
+    });
+};
 
 
 

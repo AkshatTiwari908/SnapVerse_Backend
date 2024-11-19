@@ -1,25 +1,26 @@
-const User = require('../models/users')
-const Message = require('../models/messages')
+const User = require('../models/users');
+const Message = require('../models/messages');
 
-module.exports.join = async({userId})=>{
+module.exports.join = async ({ userId }, io, socket) => {
     try {
         const user = await User.findByIdAndUpdate(
             userId,
             { online: true, socketId: socket.id },
             { new: true }
         );
+
         if (user) {
             console.log(`User ${userId} joined with socket ID ${socket.id}`);
             const undeliveredMessages = await Message.find({
                 receiver: userId,
-                delivered: false
+                delivered: false,
             });
 
             undeliveredMessages.forEach((message) => {
                 io.to(socket.id).emit('receiveMessage', {
                     messageContent: message.messageContent,
                     senderId: message.sender,
-                    timestamp: message.timestamp
+                    timestamp: message.timeStamp,
                 });
 
                 // Mark as delivered after sending
@@ -32,9 +33,9 @@ module.exports.join = async({userId})=>{
     } catch (error) {
         console.error('Error joining user:', error);
     }
-}
+};
 
-module.exports.sendMessage =  async ({ senderId, receiverId, messageContent }) => {
+module.exports.sendMessage = async ({ senderId, receiverId, messageContent }, io) => {
     try {
         // Save message to DB
         const message = await Message.create({
@@ -42,17 +43,16 @@ module.exports.sendMessage =  async ({ senderId, receiverId, messageContent }) =
             receiver: receiverId,
             messageContent,
             delivered: false,
-            timeStamp: new Date() 
+            timeStamp: new Date(),
         });
 
         const receiver = await User.findById(receiverId);
 
-        if (receiver && receiver.online && receiver.socketId) {
-            // Emit message to receiver if online
+        if (receiver && receiver.isOnline && receiver.socketId) {
             io.to(receiver.socketId).emit('receiveMessage', {
                 messageContent,
                 senderId,
-                timeStamp: message.timeStamp
+                timeStamp: message.timeStamp,
             });
             await Message.findByIdAndUpdate(message._id, { delivered: true });
             console.log(`Message sent from ${senderId} to ${receiverId}`);
@@ -62,7 +62,8 @@ module.exports.sendMessage =  async ({ senderId, receiverId, messageContent }) =
     } catch (error) {
         console.error('Error sending message:', error);
     }
-}
+};
+
 module.exports.markAsRead = async ({ userId, senderId }) => {
     try {
         // Update unread messages from sender to receiver as read
@@ -74,9 +75,9 @@ module.exports.markAsRead = async ({ userId, senderId }) => {
     } catch (error) {
         console.error('Error marking messages as read:', error);
     }
-}
+};
 
-module.exports.disconnect = async () => {
+module.exports.disconnect = async (socket) => {
     try {
         const user = await User.findOneAndUpdate(
             { socketId: socket.id },
@@ -90,4 +91,4 @@ module.exports.disconnect = async () => {
     } catch (error) {
         console.error('Error handling disconnect:', error);
     }
-}
+};

@@ -111,7 +111,7 @@ module.exports.deletePost = async (req, res) => {
 
 exports.getFollowingPosts = async (req, res) => {
   try {
-    const userId = req.params.id; // Get userId from JWT middleware
+    const userId = req.userId; // Get userId from JWT middleware
     console.log(`Trying to fetch ${userId}`)
     // Find all users the current user is following
     const following = await Follow.find({
