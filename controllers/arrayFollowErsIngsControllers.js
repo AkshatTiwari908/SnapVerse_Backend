@@ -2,7 +2,7 @@ const Follow = require('../models/follow.js')
 const mongoose = require('mongoose')
 
 module.exports.followingArray = async(userId)=>{
-   const followings =await Follow.aggregate([
+   const followings = await Follow.aggregate([
         {
           $match: { requesterId:new mongoose.Types.ObjectId(userId), status: 'requested' }
         },

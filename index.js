@@ -8,7 +8,7 @@ const commentRoutes = require('./routes/commentRoutes');
 const profileimage = require('./routes/profileimage.js')
 const Messenger = require('./routes/chats');
 const searcher = require('./routes/searchRoutes.js')
-const myProfileRouter = require('./routes/myProfileRoute.js')
+
 const homePage = require('./routes/homeRoute.js')
 const oneToOnesocket = require('./sockets/o-oSocket');
 const dotenv = require('dotenv');
@@ -43,7 +43,6 @@ app.use('/posts', commentRoutes);
 app.use('/api/messages', Messenger);  
 app.use('/api/auth', authRoutes); 
 app.use('/api/search',searcher); 
-app.use('/api/user',myProfileRouter);
 app.use('/home',homePage)
 app.use('/',follow)   // issue here wrong routing this could damage other api routes access
 app.use('/',profileimage)
