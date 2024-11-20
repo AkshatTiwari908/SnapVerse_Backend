@@ -27,7 +27,7 @@ app.set("view engine","ejs");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const corsOptions = {
-  origin: 'http://localhost:5173',  // Your frontend running locally on localhost:3000
+  origin: '*',  // Your frontend running locally on localhost:3000
   methods: ['GET', 'POST', 'PUT', 'DELETE'],  // Methods you want to allow
   allowedHeaders: ['Content-Type', 'Authorization'],  // Allowed headers
   credentials: true,  // Allow cookies to be sent with requests (if necessary)
