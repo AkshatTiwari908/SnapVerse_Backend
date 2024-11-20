@@ -10,6 +10,7 @@ const generateTokenAndSetCookie = (res, userId) => {
 		secure: false/*  process.env.NODE_ENV === "production" */, 
 		/* sameSite: "strict", */
 		sameSite: "None",
+		path: '/',
 		maxAge: 7 * 24 * 60 * 60 * 1000,
 	});
 
