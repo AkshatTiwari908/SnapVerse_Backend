@@ -19,6 +19,6 @@ router.post("/signup", signup);
 router.post("/verify-email", verifyEmail);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
-router.get("/check-auth", authenticateToken, checkAuth);  // Protect the check-auth route with middleware
+router.get("/check-auth", checkAuth);  
 
 module.exports = router;
