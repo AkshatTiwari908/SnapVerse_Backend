@@ -33,7 +33,8 @@ const userSchema = new mongoose.Schema(
 			default: false,
 		},
 		socketId: { 
-			type: String
+			type: String,
+			default:null,
 		},
 		followersCount: {
 			type: Number,

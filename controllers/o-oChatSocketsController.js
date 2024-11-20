@@ -5,7 +5,7 @@ module.exports.join = async ({ userId }, io, socket) => {
     try {
         const user = await User.findByIdAndUpdate(
             userId,
-            { online: true, socketId: socket.id },
+            { isOnline: true, socketId: socket.id },
             { new: true }
         );
 
