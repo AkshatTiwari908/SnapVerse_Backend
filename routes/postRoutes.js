@@ -18,7 +18,7 @@ router.post('/',authenticateToken ,upload.single('image'), postController.create
 router.post('/:postId/like', authenticateToken, postController.toggleLike);
 // Delete a post (authentication required)
 router.delete('/:postId', authenticateToken, postController.deletePost);
-router.get('/following/:id',postController.getFollowingPosts);
+router.get('/following',authenticateToken,postController.getFollowingPosts);
 
 
 module.exports = router;

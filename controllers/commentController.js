@@ -1,11 +1,11 @@
-const Post = require('../models/post.js'); // Import your Post model
-const User = require('../models/users.js'); // Import your User model
+const { Post, Comment } = require('../models/post.js'); // Import Post and Comment models
+const User = require('../models/users.js'); // Import User model
 
 // Add a new comment to a post
 module.exports.addComment = async (req, res) => {
     try {
         const { postId } = req.params;
-        const { text } = req.body;  // Assuming 'text' is the content of the comment
+        const { text } = req.body;  // The text content of the comment
         const userId = req.userId;  // Get user ID from the token
 
         // Find the user by userId
@@ -20,18 +20,21 @@ module.exports.addComment = async (req, res) => {
             return res.status(404).json({ error: 'Post not found' });
         }
 
-        // Create the new comment object
-        const newComment = {
-            user: user._id,  // Use the user ID from the found user
+        // Create the new comment object and save it to the Comment collection
+        const newComment = new Comment({
+            user: user._id,  // The user who made the comment
+            post: post._id,  // Reference to the post the comment belongs to
             text,
             timestamp: new Date(),
-        };
+        });
 
-        // Push the comment into the post's comments array
-        post.comments.push(newComment);
+        await newComment.save();
+
+        // Update the post's commentsCount and save the post
+        post.commentsCount += 1;
         await post.save();
 
-        res.status(201).json({ message: 'Comment added successfully', post });
+        res.status(201).json({ message: 'Comment added successfully', newComment });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error adding comment' });
@@ -50,8 +53,8 @@ module.exports.deleteComment = async (req, res) => {
             return res.status(404).json({ error: 'Post not found' });
         }
 
-        // Find the comment by commentId in the post's comments
-        const comment = post.comments.id(commentId);
+        // Find the comment by commentId in the Comment collection
+        const comment = await Comment.findById(commentId);
         if (!comment) {
             return res.status(404).json({ error: 'Comment not found' });
         }
@@ -61,8 +64,11 @@ module.exports.deleteComment = async (req, res) => {
             return res.status(403).json({ error: 'You are not authorized to delete this comment' });
         }
 
-        // Pull the comment out of the post's comments array
-        post.comments.pull(commentId);
+        // Remove the comment from the Comment collection
+        await Comment.findByIdAndDelete(commentId);
+
+        // Update the post's commentsCount and save the post
+        post.commentsCount -= 1;
         await post.save();
 
         res.status(200).json({ message: 'Comment deleted successfully', post });
@@ -71,4 +77,3 @@ module.exports.deleteComment = async (req, res) => {
         res.status(500).json({ error: 'Error deleting comment' });
     }
 };
-
