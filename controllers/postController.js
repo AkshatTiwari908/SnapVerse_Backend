@@ -20,7 +20,7 @@ module.exports.getPosts = async (req, res) => {
 module.exports.createPost = async (req, res) => {
     try {
         const { caption } = req.body;
-        const userId = req.params.id ; // Retrieved from the authenticateToken middleware
+        const userId = req.userId ; // Retrieved from the authenticateToken middleware
 
         // Check if the user exists
         const user = await User.findById(userId);
