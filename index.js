@@ -28,10 +28,10 @@ app.set("view engine","ejs");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const corsOptions = {
-  origin: '*',  // Your frontend running locally on localhost:3000
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],  // Methods you want to allow
-  allowedHeaders: ['Content-Type', 'Authorization'],  // Allowed headers
-  credentials: true,  // Allow cookies to be sent with requests (if necessary)
+  origin: '*', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+  allowedHeaders: ['Content-Type', 'Authorization'], 
+  credentials: true,  
 };
 app.use(cors(corsOptions));
 app.use(express.static(path.join(__dirname,'clientTesting')));  
