@@ -1,6 +1,7 @@
 const Post = require('../models/post');
 const User = require('../models/users');
 const Follow = require('../models/follow.js');
+const followingsFollowersControllers = require('../controllers/arrayFollowErsIngsControllers.js')
 // Fetch all posts
 module.exports.getPosts = async (req, res) => {
     try {
@@ -111,18 +112,11 @@ module.exports.deletePost = async (req, res) => {
 
 exports.getFollowingPosts = async (req, res) => {
   try {
-    const userId = req.params.id; // Get userId from JWT middleware
-    console.log(`Trying to fetch ${userId}`)
-    // Find all users the current user is following
-    const following = await Follow.find({
-      requesterId: userId,
-      status: 'accepted' 
-    }).select('receiverId'); 
+    const userId = req.userId; 
+    const following = await followingsFollowersControllers.followingArray(userId)
 
-    // Extract the IDs of the users being followed
     const followingIds = following.map(follow => follow.receiverId);
 
-    // Fetch posts only from the users being followed
     const posts = await Post.find({ user: { $in: followingIds } }) // Filter posts
       .populate('user', 'name') // Populate user details (e.g., name)
       .populate('comments.user', 'name') // Populate commenter details
