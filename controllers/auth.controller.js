@@ -94,7 +94,9 @@ const login = async function (req, res) {
         if (!isPasswordValid) {
             return res.status(400).json({ success: false, message: "Invalid credentials" });
         }
-
+        if (!user.isVerified) {
+            return res.status(400).json({ success: false, message: "Please verify your email first" });
+        }
         generateTokenAndSetCookie(res, user._id);
 
         user.lastLogin = new Date();
