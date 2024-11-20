@@ -181,7 +181,11 @@ const checkAuth = async function (req, res) {
         if (!user) {
             return res.status(400).json({ success: false, message: "User not found" });
         }
+        const newToken = generateTokenAndSetCookie(res, user._id); 
 
+        
+       
+       
         return res.status(200).json({ success: true, user });
     } catch (error) {
         console.log("Error in checkAuth ", error);
