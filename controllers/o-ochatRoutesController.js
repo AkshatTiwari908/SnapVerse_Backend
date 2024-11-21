@@ -50,8 +50,8 @@ module.exports.openInbox = async (req, res) => {  //Tested Fine
 
 module.exports.chatHistory = async (req, res) => {
     
-  const { senderId, receiverId } = req.body;  
-
+  const senderId  = req.params.senderId;  
+  const receiverId = req.params.receiverId
   // Ensure that the userId is either sender or receiver (validation can be added)
   try {
     const messages = await Message.find({
