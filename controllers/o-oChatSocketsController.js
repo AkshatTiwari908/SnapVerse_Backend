@@ -17,6 +17,10 @@ module.exports.join = async ({ userId }, io, socket) => {
             });
 
             undeliveredMessages.forEach((message) => {
+                if (!message.messageContent) {
+                    console.error(`Message with ID ${message._id} is missing content.`);
+                    return; // Skip this message
+                }
                 io.to(socket.id).emit('receiveMessage', {
                     messageContent: message.messageContent,
                     senderId: message.sender,
@@ -27,6 +31,7 @@ module.exports.join = async ({ userId }, io, socket) => {
                 message.delivered = true;
                 message.save();
             });
+
         } else {
             console.log('User not found');
         }
@@ -38,15 +43,19 @@ module.exports.join = async ({ userId }, io, socket) => {
 module.exports.sendMessage = async ({ senderId, receiverId, messageContent }, io) => {
     try {
         // Save message to DB
+        console.log(messageContent);
+        console.log(receiverId);
+
         const message = await Message.create({
             sender: senderId,
             receiver: receiverId,
-            messageContent,
+            messageContent: messageContent,
             delivered: false,
             timeStamp: new Date(),
         });
 
         const receiver = await User.findById(receiverId);
+        // console.log(receiver);
 
         if (receiver && receiver.isOnline && receiver.socketId) {
             io.to(receiver.socketId).emit('receiveMessage', {
@@ -81,7 +90,7 @@ module.exports.disconnect = async (socket) => {
     try {
         const user = await User.findOneAndUpdate(
             { socketId: socket.id },
-            { online: false, socketId: null }
+            { isOnline: false, socketId: null }
         );
         if (user) {
             console.log(`User ${user._id} disconnected and is offline`);
