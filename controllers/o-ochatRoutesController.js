@@ -48,27 +48,29 @@ module.exports.openInbox = async (req, res) => {  //Tested Fine
   }
 }
 
- module.exports.chatHistory = async (req, res) => {   // Tested Fine
-   const userId = req.userId
-    let opener = req.userId
-    sender = await User.findOne({ userName: receiverUsername }) 
-    opener = await User.findById(opener)
+module.exports.chatHistory = async (req, res) => {
+    
+  const { senderId, receiverId } = req.body;  
 
-  
-    try {
-      const messages = await Message.find({
-        $or: [
-          { sender: sender._id, receiver: opener},
-          { sender: opener, receiver: sender._id }
-        ]
-      }).sort({ timeStamp: 1 });  // oldest first
-      res.status(200).json(messages);
+  // Ensure that the userId is either sender or receiver (validation can be added)
+  try {
+    const messages = await Message.find({
+      $or: [
+        { sender: senderId, receiver: receiverId },  // sender sends to receiver
+        { sender: receiverId, receiver: senderId }   // receiver sends to sender
+      ]
+    }).sort({ timeStamp: 1 });  // Sorting by timestamp to get the messages in chronological order
 
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to fetch messages' });
-      console.error(error);
-    }
+    // Respond with the messages
+    res.status(200).json(messages);
+
+  } catch (error) {
+    // Error handling
+    res.status(500).json({ message: 'Failed to fetch messages' });
+    console.error(error);
   }
+};
+
   
   module.exports.sendMessage = async(req,res)=>{  //Tested Fine
     const {receiverUsername,messageContent}=req.body
