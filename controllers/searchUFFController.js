@@ -27,7 +27,7 @@ module.exports.searchGlobal = async(req,res)=>{
 
 module.exports.searchMyFollowers = async(req,res)=>{
     try {
-        const userId = req.userId  // whooseFollowers
+        const userId = req.userId  // whoose Followers
         const query = req.query.q  // Searched User
         const followers = await listofFollowersFollowings.followersArray()
        
