@@ -28,11 +28,17 @@ app.set("view engine","ejs");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const corsOptions = {
-  origin: 'https://hola-socialmedia-app.vercel.app', 
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
-  allowedHeaders: ['Content-Type', 'Authorization'], 
-  credentials: true,  
+  origin: [
+    'https://hola-socialmedia-app.vercel.app',
+    'http://localhost:5173'                   
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
 };
+
+app.use(cors(corsOptions));
+
 app.use(cors(corsOptions));
 app.use(express.static(path.join(__dirname,'clientTesting')));  
 app.use('/public', express.static('public'));
