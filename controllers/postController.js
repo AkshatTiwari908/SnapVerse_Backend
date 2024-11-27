@@ -22,7 +22,6 @@ module.exports.getPosts = async (req, res) => {
                 };
             })
         );
-
         res.status(200).json({ posts: postsWithCounts });
     } catch (err) {
         console.error(err);

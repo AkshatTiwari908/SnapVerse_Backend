@@ -8,5 +8,5 @@ router.post('/:postId/comments', authenticateToken, commentController.addComment
 
 // Delete a comment from a post (authentication required)
 router.delete('/:postId/comments/:commentId', authenticateToken, commentController.deleteComment);
-
+router.get('/:postId/comments', commentController.getComments);
 module.exports = router;
