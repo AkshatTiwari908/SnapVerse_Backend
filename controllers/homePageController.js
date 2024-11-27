@@ -57,3 +57,20 @@ module.exports.getLoggedInUser = async (req,res)=>{
       res.status(500).json({error:'failed to fetch user data'})
   }
 }
+
+module.exports.getSuggestedUsers = async (req, res) => {
+  try {
+    const count = await User.countDocuments();
+    const numberOfUsers = Math.min(count, 15);
+    const users = await User.aggregate([
+      { $sample: { size: numberOfUsers } }, 
+      { $project: { userName: 1, name: 1, profileImage: 1, isOnline: 1 } }
+    ]);
+    if (users.length === 0) {
+      return res.status(404).json({ message: 'No users found' });
+    }
+    return res.json(users);
+  } catch (err) {
+    return res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
