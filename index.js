@@ -30,7 +30,9 @@ app.use(express.urlencoded({ extended: true }));
 const corsOptions = {
   origin: [
     'https://hola-socialmedia-app.vercel.app',
-    'http://localhost:5173'                   
+    'http://localhost:5173',
+    'http://170.70.0.87:5173',
+    'http://192.168.137.1:5173'                   
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
