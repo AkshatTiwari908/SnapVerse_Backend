@@ -77,3 +77,27 @@ module.exports.deleteComment = async (req, res) => {
         res.status(500).json({ error: 'Error deleting comment' });
     }
 };
+module.exports.getComments = async (req, res) => {
+    try {
+        const { postId } = req.params;
+
+        // Find the post to ensure it exists
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        // Fetch all comments for the post, populate user details
+        const comments = await Comment.find({ post: postId })
+            .populate('user', 'userName') // Populate user details (adjust fields as needed)
+            .sort({ timestamp: -1 }); // Sort by most recent first
+
+        res.status(200).json({
+            message: 'Comments fetched successfully',
+            comments,
+        });
+    } catch (error) {
+        console.error('Error fetching comments:', error);
+        res.status(500).json({ error: 'Error fetching comments' });
+    }
+};
