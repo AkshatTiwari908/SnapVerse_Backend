@@ -7,7 +7,7 @@ exports.sendFollowRequest = async (req, res) => {
     const senderId = req.userId; 
     const receiverUsername = req.params.receiverUsername; 
    
-    
+   
     const receiver = await User.findOne({ userName: receiverUsername });
    
     const receiverId = receiver._id;
@@ -30,12 +30,12 @@ exports.sendFollowRequest = async (req, res) => {
 
      await User.findByIdAndUpdate(receiverId, { $inc: { followersCount: 1 } });
 
-     await Notification.create({
-      user: senderId,
-      sender: receiverId,
-      type: 'follow', 
-      content: `User ${followerId} started following you.`,
-    });
+    //  await Notification.create({
+    //   user: senderId,
+    //   sender: receiverId,
+    //   type: 'follow', 
+    //   content: `User ${senderId} started following you.`,
+    // });
 
     res.status(201).json({ message: "Follow request sent!" });
   } catch (error) {
@@ -77,9 +77,13 @@ const getFollowers = async (userId) => {
       const followers = await Follow.find({
         receiverId: userId,
         status: 'requested'
-      }).populate('requesterId', 'userName'); // Populate to get the username of the follower
+      }).populate('requesterId', 'userName profileImage'); // Populate to get the username of the follower
   
-      return followers.map(follow => follow.requesterId); 
+      return followers.map(follow => ({
+        requesterId: follow.requesterId._id,                
+        userName: follow.requesterId.userName,             
+        profileImage: follow.requesterId.profileImage?.url 
+      }));
     } catch (error) {
       console.error("Error fetching followers:", error);
       throw new Error("Error fetching followers");
@@ -91,9 +95,14 @@ const getFollowers = async (userId) => {
       const following = await Follow.find({
         requesterId: userId,
         status: 'requested'
-      }).populate('receiverId', 'userName'); 
+      }).populate('receiverId', 'userName profileImage'); // Populate to get the username of the user being followed
   
-      return following.map(follow => follow.receiverId);
+      
+      return following.map(follow => ({
+        requesterId: follow.receiverId._id,                
+        userName: follow.receiverId.userName,             
+        profileImage: follow.receiverId.profileImage?.url 
+      }));
     } catch (error) {
       console.error("Error fetching following:", error);
       throw new Error("Error fetching following");
