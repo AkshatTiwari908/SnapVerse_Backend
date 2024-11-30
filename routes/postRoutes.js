@@ -12,13 +12,13 @@ const authenticateToken = require('../middleware/middleware.js');
 router.get('/', postController.getPosts);
 
 // Create a new post (authentication required)
-router.post('/', authenticateToken, upload.single('image'), postController.createPost);
+router.post('/',authenticateToken ,upload.single('image'), postController.createPost);
 
 // Toggle like on a post (authentication required)
 router.post('/:postId/like', authenticateToken, postController.toggleLike);
 // Delete a post (authentication required)
 router.delete('/:postId', authenticateToken, postController.deletePost);
-router.get('/following/:id',postController.getFollowingPosts);
+router.get('/following',authenticateToken,postController.getFollowingPosts);
 
 
 module.exports = router;

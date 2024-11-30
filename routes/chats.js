@@ -5,7 +5,7 @@ const verifyToken = require('../middleware/middleware.js');
 const oneToOnechatRouteController = require('../controllers/o-ochatRoutesController')
 
 // Chat history retreival
-router.get('/:senderUN',verifyToken,oneToOnechatRouteController.chatHistory ); // Tested Fine
+router.get('/chatHistory/:senderId/:receiverId',verifyToken,oneToOnechatRouteController.chatHistory ); // Tested Fine
 router.post('/send',verifyToken,oneToOnechatRouteController.sendMessage)//Tested Fine
 router.put('/markAsRead',verifyToken,oneToOnechatRouteController.markAsRead)// Tested Fine 
 

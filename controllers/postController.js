@@ -1,26 +1,43 @@
-const Post = require('../models/post');
+const {Post,Like,Comment} = require('../models/post');
 const User = require('../models/users');
 const Follow = require('../models/follow.js');
+const multer = require('multer');
+const sharp = require('sharp'); // Ensure sharp is installed and imported
 const followingsFollowersControllers = require('../controllers/arrayFollowErsIngsControllers.js')
-// Fetch all posts
 module.exports.getPosts = async (req, res) => {
     try {
         const posts = await Post.find()
-            .populate('user', 'name')
-            .populate('comments.user', 'name')
+            .populate('user', 'name profileImage') // Include name and profile picture of the post author
             .sort({ timestamp: -1 });
-        res.status(200).json({ posts });
+
+        // Enhance posts with like and comment counts
+        const postsWithCounts = await Promise.all(
+            posts.map(async (post) => {
+                const likesCount = await Like.countDocuments({ post: post._id });
+                const commentsCount = await Comment.countDocuments({ post: post._id });
+                return {
+                    ...post.toObject(),
+                    likesCount,
+                    commentsCount,
+                };
+            })
+        );
+        res.status(200).json({ posts: postsWithCounts });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error fetching posts');
     }
 };
 
-// Create a new post
+
+
+
+const cloudinary = require('cloudinary').v2;
+
 module.exports.createPost = async (req, res) => {
     try {
         const { caption } = req.body;
-        const userId = req.userId; // Retrieved from the authenticateToken middleware
+        const userId = req.userId ; // Retrieved from the authenticateToken middleware
 
         // Check if the user exists
         const user = await User.findById(userId);
@@ -28,20 +45,38 @@ module.exports.createPost = async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        const image = req.file
-            ? {
-                  url: req.file.path,
-                  filename: req.file.filename,
-              }
-            : null;
+        let image = null;
 
+        // Handle image upload to Cloudinary
+        if (req.file) {
+            try {
+                // Upload image to Cloudinary with transformations
+                const uploadResponse = await cloudinary.uploader.upload(req.file.path, {
+                    width: 800,
+                    height: 800,
+                    crop: 'fit', // Resizes the image to fit within 800x800 while maintaining aspect ratio
+                });
+
+                // Store the Cloudinary URL and filename
+                image = {
+                    url: uploadResponse.secure_url,
+                    filename: uploadResponse.public_id,
+                };
+            } catch (imageError) {
+                console.error('Error uploading image:', imageError);
+                return res.status(500).json({ error: 'Error uploading image' });
+            }
+        }
+
+        // Create and save the post
         const post = new Post({
-            user: user._id,
+            user: userId,
             image,
             caption,
             timestamp: new Date(),
-        }); 
+        });
         await post.save();
+
         res.status(201).json(post);
     } catch (error) {
         console.error(error);
@@ -49,7 +84,6 @@ module.exports.createPost = async (req, res) => {
     }
 };
 
-// Toggle like on a post
 module.exports.toggleLike = async (req, res) => {
     try {
         const { postId } = req.params;
@@ -60,23 +94,24 @@ module.exports.toggleLike = async (req, res) => {
             return res.status(404).json({ error: 'Post not found' });
         }
 
-        // Check if the user has already liked the post
-        const hasLiked = post.likes.includes(userId);
+        const existingLike = await Like.findOne({ post: postId, user: userId });
 
-        if (hasLiked) {
-            // Remove the user's like
-            post.likes = post.likes.filter(id => id.toString() !== userId);
+        if (existingLike) {
+            // Unlike the post
+            await Like.findByIdAndDelete(existingLike._id);
+            post.likesCount -= 1; // Decrement likesCount
         } else {
-            // Add the user's like
-            post.likes.push(userId);
+            // Like the post
+            const like = new Like({ post: postId, user: userId });
+            await like.save();
+            post.likesCount += 1; // Increment likesCount
         }
 
-        await post.save();
+        await post.save(); // Save the updated likesCount
 
         res.status(200).json({
-            message: hasLiked ? 'Post unliked' : 'Post liked',
-            likesCount: post.likes.length,
-            post,
+            message: existingLike ? 'Post unliked' : 'Post liked',
+            likesCount: post.likesCount,
         });
     } catch (error) {
         console.error(error);
@@ -84,7 +119,6 @@ module.exports.toggleLike = async (req, res) => {
     }
 };
 
-// Delete a post
 module.exports.deletePost = async (req, res) => {
     try {
         const { postId } = req.params;
@@ -100,7 +134,10 @@ module.exports.deletePost = async (req, res) => {
             return res.status(403).json({ error: 'Unauthorized to delete this post' });
         }
 
+        // Delete the post and related likes and comments
         await Post.findByIdAndDelete(postId);
+        await Like.deleteMany({ post: postId });
+        await Comment.deleteMany({ post: postId });
 
         res.status(200).json({ message: 'Post deleted successfully' });
     } catch (error) {
@@ -110,21 +147,34 @@ module.exports.deletePost = async (req, res) => {
 };
 
 
+
 exports.getFollowingPosts = async (req, res) => {
-  try {
-    const userId = req.userId; 
-    const following = await followingsFollowersControllers.followingArray(userId)
+    try {
+        const userId = req.userId;
+        const following = await followingsFollowersControllers.followingArray(userId);
 
-    const followingIds = following.map(follow => follow.receiverId);
+        const followingIds = following.map(follow => follow.receiverId);
 
-    const posts = await Post.find({ user: { $in: followingIds } }) // Filter posts
-      .populate('user', 'name') // Populate user details (e.g., name)
-      .populate('comments.user', 'name') // Populate commenter details
-      .sort({ timestamp: -1 }); // Sort by timestamp, latest first
+        const posts = await Post.find({ user: { $in: followingIds } })
+            .populate('user', 'name profileImage') // Include name and profile picture of the post author
+            .sort({ timestamp: -1 });
 
-    res.status(200).json({ posts });
-  } catch (err) {
-    console.error("Error fetching following posts:", err);
-    res.status(500).send('Error fetching posts');
-  }
+        // Enhance posts with like and comment counts
+        const postsWithCounts = await Promise.all(
+            posts.map(async (post) => {
+                const likesCount = await Like.countDocuments({ post: post._id });
+                const commentsCount = await Comment.countDocuments({ post: post._id });
+                return {
+                    ...post.toObject(),
+                    likesCount,
+                    commentsCount,
+                };
+            })
+        );
+
+        res.status(200).json({ posts: postsWithCounts });
+    } catch (err) {
+        console.error('Error fetching following posts:', err);
+        res.status(500).send('Error fetching posts');
+    }
 };
