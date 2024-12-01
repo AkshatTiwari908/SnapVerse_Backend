@@ -60,7 +60,7 @@ const userSchema = new mongoose.Schema(
 		coverImage: {
 			url: {
 				type: String, // URL to the image file (could be a link from Cloudinary or your server)
-				default: 'https://res.cloudinary.com/dl10fq0cu/image/upload/v1731652645/00000000000000000000000000000000_wrtw74.jpg' // You can set a default image URL here if required
+				default: 'https://res.cloudinary.com/dl10fq0cu/image/upload/c_fill,g_auto,h_250,w_970/b_rgb:000000,e_gradient_fade,y_-0.50/c_scale,co_rgb:ffffff,fl_relative,l_text:montserrat_25_style_light_align_center:Shop%20Now,w_0.5,y_0.18/v1732961513/tvnz1k3ogooffsrzf54j.jpg' // You can set a default image URL here if required
 			},
 			filename: {
 				type: String, // The filename of the image uploaded
